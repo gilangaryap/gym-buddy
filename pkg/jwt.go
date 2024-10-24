@@ -8,16 +8,16 @@ import (
 )
 
 type claims struct {
-	Id    		string `json:"id"`
-	PhoneNumber string `json:"phone_number"`
-	Role  		string `json:"role"`
+	Id    string `json:"id"`
+	Email string `json:"email"`
+	Role  string `json:"role"`
 	jwt.RegisteredClaims
 }
 
-func NewJWT(id, phone_number string, role string) *claims {
+func NewJWT(id, email string, role string) *claims {
 	return &claims{
 		Id:    id,
-		PhoneNumber: phone_number,
+		Email: email,
 		Role: role,
 		RegisteredClaims: jwt.RegisteredClaims{
 			Issuer:    "TICKITZ",
