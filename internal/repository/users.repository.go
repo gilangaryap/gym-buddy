@@ -19,7 +19,7 @@ func NewUserRepository(db *sqlx.DB) *UserRepository {
 }
 
 func (r *UserRepository) CreateData(body *models.User) (string, error) {
-	query := `INSERT INTO public.users (username, phone_number, password_hash) VALUES ( :username,:phone_number, :password_hash)`
+	query := `INSERT INTO public.users (username, email , password_hash) VALUES ( :username ,:email , :password_hash)`
 
 	_, err := r.NamedExec(query, body)
 	if err != nil {

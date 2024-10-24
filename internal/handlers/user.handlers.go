@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"gilangaryap/gym-buddy/internal/middlewares"
 	"gilangaryap/gym-buddy/internal/models"
 	"gilangaryap/gym-buddy/internal/repository"
 	"gilangaryap/gym-buddy/pkg"
@@ -37,6 +38,14 @@ func (h *AuthHandler) Register(ctx *gin.Context) {
 		response.BadRequest("Register failed", "Error")
 		return
 	}
+
+	validatedEmail, err := middlewares.Register(body.Email)
+    if err != nil {
+        response.BadRequest("Register failed", "Email validation error: "+err.Error())
+        return
+    }
+    
+    body.Email = validatedEmail
 
 	result, err := h.CreateData(&body)
 	if err != nil {
