@@ -20,7 +20,7 @@ func NewJWT(id, email string, role string) *claims {
 		Email: email,
 		Role: role,
 		RegisteredClaims: jwt.RegisteredClaims{
-			Issuer:    "TICKITZ",
+			Issuer:    "GYM-BUDDY",
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Hour * 24)),
 		},
 	}
