@@ -1,7 +1,7 @@
 package handler
 
 import (
-	"fmt"
+	"encoding/base64"
 	"gilangaryap/gym-buddy/internal/models"
 	"gilangaryap/gym-buddy/internal/repository"
 	"gilangaryap/gym-buddy/pkg"
@@ -27,32 +27,23 @@ func (h *QrHandler) CreateQRCodeHandler(ctx *gin.Context) {
 		return
 	}
 
-	if body.UserID == "" || body.SubOptID <= 0 {
-		response.BadRequest("QR Code creation failed", "Invalid user ID or subscription option ID")
-		return
-	}
+	data := ".png"
+	
+	png, err := qrcode.Encode(data, qrcode.Medium, 256)
+    if err != nil {
+        response.BadRequest("QR Code creation failed", "Error generating QR code: "+err.Error())
+        return
+    }
 
-	url := fmt.Sprintf("https://example.com/subscription?user=%s&option=%d", body.UserID, body.SubOptID)
+	
 
-	qr, err := qrcode.New(url, qrcode.Medium)
-	if err != nil {
-		response.BadRequest("QR Code creation failed", "Error generating QR code: "+err.Error())
-		return
-	}
-
-	filename := fmt.Sprintf("qrcode_%s_%d.png", body.UserID, body.SubOptID)
-	if err := qr.WriteFile(256, filename); err != nil {
-		response.BadRequest("QR Code creation failed", "Error saving QR code file: "+err.Error())
-		return
-	}
-
-	body.URL = filename
+	body.QrCodeData = base64.StdEncoding.EncodeToString(png)
 
 	if _, err := h.CreateQRCode(body); err != nil {
 		response.BadRequest("QR Code creation failed", "Error saving to database: "+err.Error())
 		return
 	}
 
-
+	filename := "qrcode.png" 
 	response.Created("QR Code creation success", map[string]string{"filename": filename})
 }

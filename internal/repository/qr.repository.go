@@ -1,9 +1,8 @@
 package repository
 
 import (
-	"errors"
+	"fmt"
 	"gilangaryap/gym-buddy/internal/models"
-	"time"
 
 	"github.com/jmoiron/sqlx"
 )
@@ -21,8 +20,20 @@ func NewQrRepository(db *sqlx.DB) *QrRepository {
 }
 
 func (r *QrRepository) CreateQRCode(body *models.QRCode) (string, error) {
+    fmt.Printf("Inserting QR code with SubscriptionID: %d, QrCodeData: %s\n", body.SubscriptionID, body.QrCodeData)
 
-	var durationDays int
+    query := `INSERT INTO qr_codes (subscription_id, qr_code_data) VALUES ($1, $2)`
+    _, err := r.Exec(query, body.SubscriptionID, body.QrCodeData)
+    if err != nil {
+        // Log kesalahan jika terjadi
+        fmt.Printf("Error inserting QR code: %v\n", err)
+        return "", err
+    }
+    return body.QrCodeData, nil
+}
+
+
+/* var durationDays int
 	switch body.SubOptID {
 	case 1:
 		durationDays = 30
@@ -33,18 +44,4 @@ func (r *QrRepository) CreateQRCode(body *models.QRCode) (string, error) {
 	default:
 		return "", errors.New("invalid sub_opt_id")
 	}
-	
-	startSubAt := time.Now()
-	expiryAt := startSubAt.AddDate(0, 0, durationDays)
-
-	body.StartSubAt = startSubAt
-	body.ExpiryAt = expiryAt
-	
-	query := `INSERT INTO qr_codes (url, user_id, sub_opt_id , start_sub_at , expiry_at ) VALUES (:url, :user_id, :sub_opt_id, :start_sub_at, :expiry_at)`
-	_, err := r.NamedExec(query, body)
-	if err != nil {
-		return "", err
-	}
-
-	return body.URL, nil 
-}
+	 */

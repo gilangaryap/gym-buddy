@@ -1,0 +1,12 @@
+root = "."
+tmp_dir = "tmp"
+
+[build]
+  bin = "tmp/main"
+  cmd = "go build -o ./tmp/main.exe ./cmd/main.go"
+  include_ext = ["go"]
+  exclude_dir = ["assets", "tmp"]
+
+[log]
+  time_format = "2006-01-02 15:04:05"
+  log_level = "info"
