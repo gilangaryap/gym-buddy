@@ -1,7 +1,7 @@
 package handler
 
 import (
-	"encoding/base64"
+	"fmt"
 	"gilangaryap/gym-buddy/internal/models"
 	"gilangaryap/gym-buddy/internal/repository"
 	"gilangaryap/gym-buddy/pkg"
@@ -21,29 +21,40 @@ func NewQrHandler(repo repository.QrRepositoryInterface) *QrHandler {
 func (h *QrHandler) CreateQRCodeHandler(ctx *gin.Context) {
 	response := pkg.NewResponse(ctx)
 	body := &models.QRCode{}
+	uuid := ctx.Param("uuid")
 
-	if err := ctx.ShouldBind(&body); err != nil {
-		response.BadRequest("QR Code creation failed", "Invalid request payload")
+	// Bind the request body to the QRCode model
+	if err := ctx.ShouldBind(body); err != nil {
+		response.BadRequest("QR Code creation failed", "Invalid request payload: "+err.Error())
 		return
 	}
 
-	data := ".png"
-	
-	png, err := qrcode.Encode(data, qrcode.Medium, 256)
-    if err != nil {
-        response.BadRequest("QR Code creation failed", "Error generating QR code: "+err.Error())
-        return
-    }
+	// Construct the URL for the QR code
+	url := fmt.Sprintf("http://localhost:8080/status/%s", uuid)
 
-	
+	// Generate the QR code
+	qr, err := qrcode.New(url, qrcode.Medium)
+	if err != nil {
+		response.BadRequest("QR Code creation failed", "Error generating QR code: "+err.Error())
+		return
+	}
 
-	body.QrCodeData = base64.StdEncoding.EncodeToString(png)
+	// Define the filename for the QR code image
+	filename := fmt.Sprintf("qrcode_%s.png", uuid) // Use %s to format uuid correctly
+	if err := qr.WriteFile(256, filename); err != nil {
+		response.BadRequest("QR Code creation failed", "Error saving QR code file: "+err.Error())
+		return
+	}
 
-	if _, err := h.CreateQRCode(body); err != nil {
+	body.QrCodeData = filename // Store the filename in the body
+
+	// Save the QR code information to the database
+	if _, err := h.CreateQRCode(body); err != nil { 
 		response.BadRequest("QR Code creation failed", "Error saving to database: "+err.Error())
 		return
 	}
 
-	filename := "qrcode.png" 
+	// Return a success response
 	response.Created("QR Code creation success", map[string]string{"filename": filename})
 }
+

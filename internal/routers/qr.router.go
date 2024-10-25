@@ -14,5 +14,5 @@ func qrhRouter(g *gin.Engine, d *sqlx.DB) {
 	var qrRepo repository.QrRepositoryInterface = repository.NewQrRepository(d)
 	handler := handler.NewQrHandler(qrRepo)
 
-	router.POST("/", handler.CreateQRCodeHandler)
+	router.POST("/:uuid", handler.CreateQRCodeHandler)
 }

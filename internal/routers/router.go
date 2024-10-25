@@ -10,6 +10,7 @@ func New(db *sqlx.DB) *gin.Engine {
 
 	authRouter(router, db)
 	qrhRouter(router,db)
+	statushRouter(router , db)
 	
 	return router
 }
