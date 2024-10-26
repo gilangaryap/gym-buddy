@@ -23,38 +23,31 @@ func (h *QrHandler) CreateQRCodeHandler(ctx *gin.Context) {
 	body := &models.QRCode{}
 	uuid := ctx.Param("uuid")
 
-	// Bind the request body to the QRCode model
 	if err := ctx.ShouldBind(body); err != nil {
 		response.BadRequest("QR Code creation failed", "Invalid request payload: "+err.Error())
 		return
 	}
 
-	// Construct the URL for the QR code
-	url := fmt.Sprintf("http://localhost:8080/status/%s", uuid)
+	url := uuid
 
-	// Generate the QR code
 	qr, err := qrcode.New(url, qrcode.Medium)
 	if err != nil {
 		response.BadRequest("QR Code creation failed", "Error generating QR code: "+err.Error())
 		return
 	}
 
-	// Define the filename for the QR code image
-	filename := fmt.Sprintf("qrcode_%s.png", uuid) // Use %s to format uuid correctly
+	filename := fmt.Sprintf("qrcode_%s.png", uuid)
 	if err := qr.WriteFile(256, filename); err != nil {
 		response.BadRequest("QR Code creation failed", "Error saving QR code file: "+err.Error())
 		return
 	}
 
-	body.QrCodeData = filename // Store the filename in the body
+	body.QrCodeData = filename 
 
-	// Save the QR code information to the database
 	if _, err := h.CreateQRCode(body); err != nil { 
 		response.BadRequest("QR Code creation failed", "Error saving to database: "+err.Error())
 		return
 	}
 
-	// Return a success response
 	response.Created("QR Code creation success", map[string]string{"filename": filename})
 }
-
