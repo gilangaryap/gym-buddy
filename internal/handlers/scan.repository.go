@@ -21,7 +21,7 @@ func NewScanHandler(repo repository.StatusRepositoryInterface) *ScanHandler {
 func (h *ScanHandler) ScanQRCodeHandler(ctx *gin.Context) {
 	response := pkg.NewResponse(ctx)
 
-	file, err := ctx.FormFile("image")
+	file, err := ctx.FormFile("barcode")
 	if err != nil {
 		response.BadRequest("Error getting image file", err.Error())
 		return

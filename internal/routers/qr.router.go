@@ -12,7 +12,8 @@ func qrhRouter(g *gin.Engine, d *sqlx.DB) {
 	router := g.Group("/qr")
 
 	var qrRepo repository.QrRepositoryInterface = repository.NewQrRepository(d)
-	handler := handler.NewQrHandler(qrRepo)
+	var subRepo repository.SubRepositoryInterface = repository.NewSubRepository(d)
+	handler := handler.NewQrHandler(qrRepo, subRepo , d)
 
 	router.POST("/:uuid", handler.CreateQRCodeHandler)
 }

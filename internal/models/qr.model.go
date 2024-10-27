@@ -1,6 +1,6 @@
 package models
 
 type QRCode struct {
-    SubscriptionID int    `json:"SubscriptionID"` // Ensure this matches the JSON key
-    QrCodeData     string `json:"QrCodeData"`
+	SubscriptionID string `json:"SubscriptionID"`
+	QrCodeData     string `json:"QrCodeData"`
 }

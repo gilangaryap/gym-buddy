@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"context"
 	"fmt"
 	"gilangaryap/gym-buddy/internal/models"
 
@@ -8,7 +9,7 @@ import (
 )
 
 type QrRepositoryInterface interface {
-	CreateQRCode(body *models.QRCode) (string, error)
+	CreateQRCode( body *models.QRCode) (string, error)
 }
 
 type QrRepository struct {
@@ -19,29 +20,24 @@ func NewQrRepository(db *sqlx.DB) *QrRepository {
 	return &QrRepository{db}
 }
 
-func (r *QrRepository) CreateQRCode(body *models.QRCode) (string, error) {
-    fmt.Printf("Inserting QR code with SubscriptionID: %d, QrCodeData: %s\n", body.SubscriptionID, body.QrCodeData)
+func (r *QrRepository) CreateQRCode( body *models.QRCode) (string, error) {
+	tx, err := r.BeginTx(context.Background(),nil)
+	if err != nil {
+		fmt.Println("db.BeginTx", err)
+	} 
+	
+	var qrCodeID string
+	err = tx.QueryRowContext(context.Background(), 
+	`INSERT INTO qr_codes (subscription_id, qr_code_data) VALUES ($1, $2) RETURNING id`, 
+	body.SubscriptionID, body.QrCodeData).Scan(&qrCodeID)
 
-    query := `INSERT INTO qr_codes (subscription_id, qr_code_data) VALUES ($1, $2)`
-    _, err := r.Exec(query, body.SubscriptionID, body.QrCodeData)
-    if err != nil {
-        // Log kesalahan jika terjadi
-        fmt.Printf("Error inserting QR code: %v\n", err)
-        return "", err
-    }
-    return body.QrCodeData, nil
-}
-
-
-/* var durationDays int
-	switch body.SubOptID {
-	case 1:
-		durationDays = 30
-	case 2:
-		durationDays = 180
-	case 3:
-		durationDays = 360
-	default:
-		return "", errors.New("invalid sub_opt_id")
+	 if err != nil {
+		return "", err
 	}
-	 */
+
+	if err := tx.Commit(); err != nil {
+		return "", err
+	}
+
+    return qrCodeID, nil
+}
